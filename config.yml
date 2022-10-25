@@ -1,0 +1,14 @@
+---
+delimiters:
+    - "__"
+constantDelimiters:
+    - "$$"
+skipDelimiters:
+    - "//##"
+ignore:
+    - "config.yml"
+    - ".DS_Store"
+    - ".git"
+    - "node_modules"
+    - ".env"
+rootDirectoryName: "$$project root directory name$$"
