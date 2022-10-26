@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 // @author Yumenosuke Kokata (Founder / CTO of NEXUM)
-// @title __TokenName__
+// @title $$Token Name$$
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
@@ -27,12 +27,12 @@ contract __SYMBOL__Ver1 is
     using StringsUpgradeable for uint256;
 
     function initialize() public initializer {
-        __ERC721_init("__TokenName__", "__SYMBOL__");
+        __ERC721_init("$$Token Name$$", "__SYMBOL__");
         __ERC721Enumerable_init();
         __ERC721Burnable_init();
         __Ownable_init();
 
-        // set collect values from deploy script!
+        // set correct values from deploy script!
         baseURI = "/";
         mintLimit = 0;
         isPublicMintPaused = true;
@@ -42,7 +42,7 @@ contract __SYMBOL__Ver1 is
         allowlistedMemberMintLimit = 1;
         isRevealed = false;
         _keccakPrefix = "";
-        _royaltyFraction = 1000; // 10%
+        _royaltyFraction = 0;
         _royaltyReceiver = msg.sender;
         _withdrawalReceiver = msg.sender;
     }

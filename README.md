@@ -1,4 +1,4 @@
-# __TokenName__ powered by YUMENOSUKE
+# $$Token Name$$ powered by YUMENOSUKE
 
 Usage:
 
