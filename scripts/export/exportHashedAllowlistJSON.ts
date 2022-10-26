@@ -1,14 +1,14 @@
 import { keccak256 } from 'ethers/lib/utils'
 import { writeFileSync } from 'fs'
+import { join } from 'path'
 
 import { allowlistedAddresses } from '../libs/envs'
 
 async function main() {
-    const exportPath = process.env.FILE_EXPORT_PATH
-    if (typeof exportPath !== 'string') return
-
     const data = `[\n${allowlistedAddresses.map(keccak256).map(s => `    "${s}"`).join(",\n")}\n]`
-    writeFileSync(`${exportPath}hashedAllowlist.json`, data, { flag: "w" })
+    const exportPath = join(__dirname, "hashedAllowlist.json")
+    console.info(`writing a file to ${exportPath}`)
+    writeFileSync(exportPath, data, { flag: "w" })
 }
 
 main().catch(error => {
