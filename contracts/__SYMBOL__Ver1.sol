@@ -286,7 +286,7 @@ contract __SYMBOL__Ver1 is
     modifier checkAllowlistMintLimit(uint256 quantity) {
         require(
             numberAllowlistMinted(msg.sender) + quantity <= allowlistedMemberMintLimit,
-            "WL minting exceeds the limit"
+            "allowlist minting exceeds the limit"
         );
         _;
     }
