@@ -51,9 +51,10 @@ contract __SYMBOL__Ver1 is
     function _beforeTokenTransfer(
         address from,
         address to,
-        uint256 tokenId
+        uint256 firstTokenId,
+        uint256 batchSize
     ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
-        super._beforeTokenTransfer(from, to, tokenId);
+        super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
     }
 
     function supportsInterface(
@@ -184,7 +185,7 @@ contract __SYMBOL__Ver1 is
         checkAllowlistMintLimit(quantity)
         checkPay(allowListPrice, quantity)
     {
-        _increment(msg.sender, quantity);
+        _incrementNumberAllowlistMinted(msg.sender, quantity);
         _safeMintTokens(msg.sender, quantity);
     }
 
@@ -286,7 +287,7 @@ contract __SYMBOL__Ver1 is
 
     modifier checkAllowlistMintLimit(uint256 quantity) {
         require(
-            numberAllowlistMinted(msg.sender) + quantity <= allowlistedMemberMintLimit,
+            allowListMemberMintCount[msg.sender] + quantity <= allowlistedMemberMintLimit,
             "allowlist minting exceeds the limit"
         );
         _;
