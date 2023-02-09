@@ -36,7 +36,7 @@ describe("Mint __SYMBOL__ as allowlisted member", () => {
         await expect(await instance.connect(john).allowlistMint(quantity, proof, { value: totalPrice }))
             .to.changeEtherBalances([instance, john], [totalPrice, totalPrice.mul(-1)])
 
-        expect(await instance.numberAllowlistMinted(john.address)).to.equal(quantity)
+        expect(await instance.allowListMemberMintCount(john.address)).to.equal(quantity)
     })
 
     it("Not allowlisted member's minting is not allowed", async () => {
@@ -90,7 +90,7 @@ describe("Mint __SYMBOL__ as allowlisted member", () => {
         await expect(await instance.connect(jonathan).allowlistMint(quantity, proofOfJonathan, { value: totalPrice }))
             .to.changeEtherBalances([instance, jonathan], [totalPrice, totalPrice.mul(-1)])
 
-        expect(await instance.numberAllowlistMinted(jonathan.address)).to.equal(quantity)
+        expect(await instance.allowListMemberMintCount(jonathan.address)).to.equal(quantity)
 
         // try to mint more and fail
         await expect(instance.connect(jonathan).allowlistMint(quantity, proofOfJonathan, { value: totalPrice })).to.revertedWith("allowlist minting exceeds the limit")
@@ -99,7 +99,7 @@ describe("Mint __SYMBOL__ as allowlisted member", () => {
         const proofOfJonny = tree.getHexProof(keccak256(jonny.address))
         await instance.connect(jonny).allowlistMint(quantity, proofOfJonny, { value: totalPrice })
 
-        expect(await instance.numberAllowlistMinted(jonny.address)).to.equal(quantity)
+        expect(await instance.allowListMemberMintCount(jonny.address)).to.equal(quantity)
     })
 
     it("Allowlisted member can mint in allowlist mint limit but not over the limit of entire contract", async () => {

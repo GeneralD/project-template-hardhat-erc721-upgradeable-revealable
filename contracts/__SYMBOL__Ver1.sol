@@ -25,6 +25,7 @@ contract __SYMBOL__Ver1 is
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using MerkleProofUpgradeable for bytes32[];
     using StringsUpgradeable for uint256;
+    using Utilities for *;
 
     function initialize() public initializer {
         __ERC721_init("$$Token Name$$", "__SYMBOL__");
@@ -55,12 +56,9 @@ contract __SYMBOL__Ver1 is
         super._beforeTokenTransfer(from, to, tokenId);
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC721Upgradeable, ERC721EnumerableUpgradeable, IERC165Upgradeable)
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(ERC721Upgradeable, ERC721EnumerableUpgradeable, IERC165Upgradeable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
@@ -83,13 +81,10 @@ contract __SYMBOL__Ver1 is
         _royaltyReceiver = receiver;
     }
 
-    function royaltyInfo(uint256 tokenId, uint256 salePrice)
-        external
-        view
-        override
-        checkTokenIdExists(tokenId)
-        returns (address receiver, uint256 royaltyAmount)
-    {
+    function royaltyInfo(
+        uint256 tokenId,
+        uint256 salePrice
+    ) external view override checkTokenIdExists(tokenId) returns (address receiver, uint256 royaltyAmount) {
         receiver = _royaltyReceiver;
         royaltyAmount = (salePrice * _royaltyFraction) / 10_000;
     }
@@ -116,14 +111,9 @@ contract __SYMBOL__Ver1 is
     //// Token URI
     //////////////////////////////////
 
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        virtual
-        override
-        checkTokenIdExists(tokenId)
-        returns (string memory)
-    {
+    function tokenURI(
+        uint256 tokenId
+    ) public view virtual override checkTokenIdExists(tokenId) returns (string memory) {
         return isRevealed ? _tokenURIAfterReveal(tokenId) : _tokenURIBeforeReveal();
     }
 
@@ -148,7 +138,7 @@ contract __SYMBOL__Ver1 is
 
     function _tokenURIAfterReveal(uint256 tokenId) private view returns (string memory) {
         bytes32 keccak = keccak256(abi.encodePacked(_keccakPrefix, tokenId.toString()));
-        return _toLower(string(abi.encodePacked(_baseURI(), _toHex(keccak), ".json")));
+        return string(abi.encodePacked(_baseURI(), keccak.toHex().toLower(), ".json"));
     }
 
     function _tokenURIBeforeReveal() private view returns (string memory) {
@@ -180,9 +170,13 @@ contract __SYMBOL__Ver1 is
     //// Allowlist Mint
     //////////////////////////////////
 
-    mapping(address => uint256) allowListMemberMintCount;
+    address[] private _allowListMemberMintAddresses;
+    mapping(address => uint256) public allowListMemberMintCount;
 
-    function allowlistMint(uint256 quantity, bytes32[] calldata merkleProof)
+    function allowlistMint(
+        uint256 quantity,
+        bytes32[] calldata merkleProof
+    )
         external
         payable
         whenAllowlistMintNotPaused
@@ -190,16 +184,23 @@ contract __SYMBOL__Ver1 is
         checkAllowlistMintLimit(quantity)
         checkPay(allowListPrice, quantity)
     {
-        _incrementNumberAllowlistMinted(msg.sender, quantity);
+        _increment(msg.sender, quantity);
         _safeMintTokens(msg.sender, quantity);
-    }
-
-    function numberAllowlistMinted(address owner) public view returns (uint256) {
-        return allowListMemberMintCount[owner];
     }
 
     function _incrementNumberAllowlistMinted(address owner, uint256 quantity) private {
         allowListMemberMintCount[owner] += quantity;
+        _allowListMemberMintAddresses.push(owner);
+    }
+
+    /**
+     * @dev If you are running multiple AL-campaigns and allow for duplicate targets and resetting is necessary,
+     * run this funciton with caution. In addition, gas fee can be bit expensive.
+     */
+    function resetNumberAllowlistMinted() external onlyOwner {
+        for (uint256 i = 0; i < _allowListMemberMintAddresses.length; i++)
+            delete allowListMemberMintCount[_allowListMemberMintAddresses[i]];
+        delete _allowListMemberMintAddresses;
     }
 
     //////////////////////////////////
@@ -371,11 +372,7 @@ contract __SYMBOL__Ver1 is
     //// Admin Force Transfer
     ///////////////////////////////////////////////////////////////////
 
-    function adminForceTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) external onlyOwner {
+    function adminForceTransferFrom(address from, address to, uint256 tokenId) external onlyOwner {
         _safeTransfer(from, to, tokenId, "");
     }
 
@@ -387,8 +384,18 @@ contract __SYMBOL__Ver1 is
         require(_exists(tokenId), "tokenId not exist");
         _;
     }
+}
 
-    function _toHex(bytes32 data) private pure returns (string memory) {
+library Utilities {
+    function toLower(string memory str) internal pure returns (string memory) {
+        bytes memory b = bytes(str);
+        bytes memory l = new bytes(b.length);
+        for (uint256 i = 0; i < b.length; i++)
+            l[i] = (uint8(b[i]) >= 65) && (uint8(b[i]) <= 90) ? bytes1(uint8(b[i]) + 32) : b[i];
+        return string(l);
+    }
+
+    function toHex(bytes32 data) internal pure returns (string memory) {
         return string(abi.encodePacked(_toHex16(bytes16(data)), _toHex16(bytes16(data << 128))));
     }
 
@@ -415,13 +422,5 @@ contract __SYMBOL__Ver1 is
                     0x0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F) *
                 7
         );
-    }
-
-    function _toLower(string memory str) private pure returns (string memory) {
-        bytes memory b = bytes(str);
-        bytes memory l = new bytes(b.length);
-        for (uint256 i = 0; i < b.length; i++)
-            l[i] = (uint8(b[i]) >= 65) && (uint8(b[i]) <= 90) ? bytes1(uint8(b[i]) + 32) : b[i];
-        return string(l);
     }
 }

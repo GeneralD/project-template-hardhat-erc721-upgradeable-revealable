@@ -10,7 +10,7 @@ async function main() {
     const __SYMBOL__ = await latest__SYMBOL__Factory
     const instance = __SYMBOL__.attach((await deployedProxy()).address) as Latest__SYMBOL__
 
-    const data = await Promise.all(allowlistedAddresses.map(address => instance.numberAllowlistMinted(address)
+    const data = await Promise.all(allowlistedAddresses.map(address => instance.allowListMemberMintCount(address)
         .then(balance => ({ address, balance }))
         .catch(_ => ({ address, balance: BigNumber.from(0) }))
     ))
